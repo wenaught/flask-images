@@ -1,19 +1,24 @@
 import boto3
-from os import environ
+import argparse
 from random import choice
 from botocore.exceptions import ClientError, BotoCoreError
 from flask import Flask, send_file, Response, request
 from werkzeug.utils import secure_filename
 
-app = Flask(__name__)
 s3 = boto3.client('s3')
-BUCKET_NAME = environ.get('BUCKET_NAME')
+app = Flask('flask_images')
+DEFAULT_PORT = 8080
+
+parser = argparse.ArgumentParser()
+parser.add_argument('bucket', type=str, help='S3 bucket name')
+parser.add_argument('-p', '--port', type=int, help='Port to run the app on', default=8080)
+args = parser.parse_args()
 
 
 @app.route('/random', methods=['GET'])
 def get_random_image():
     try:
-        s3_objects = s3.list_objects_v2(Bucket=BUCKET_NAME)
+        s3_objects = s3.list_objects_v2(Bucket=args.bucket)
         random_object_key = choice(s3_objects['Contents'])['Key']
         return get_s3_object(random_object_key)
     except (ClientError, BotoCoreError) as err:
@@ -34,7 +39,7 @@ def get_image(image_name):
 def upload_image():
     try:
         f = request.files['data']
-        s3.upload_fileobj(f, BUCKET_NAME, secure_filename(f.filename))
+        s3.upload_fileobj(f, args.bucket, secure_filename(f.filename))
     except KeyError:
         return Response(response='File should be sent with \'data\' key', status=400)
     except (ClientError, BotoCoreError) as err:
@@ -44,8 +49,13 @@ def upload_image():
 
 def get_s3_object(object_key):
     file_path = '/tmp/{}'.format(object_key)
-    s3.download_file(BUCKET_NAME, object_key, file_path)
+    s3.download_file(args.bucket, object_key, file_path)
     return send_file(file_path)
 
 
-app.run(port=8080)
+def main():
+    app.run(port=args.port)
+
+
+if __name__ == '__main__':
+    main()
