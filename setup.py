@@ -21,5 +21,6 @@ setuptools.setup(
     python_requires='>=3.8',
     entry_points={
         'console_scripts': ['flask-images=flask_images.main:main']
-    }
+    },
+    license='MIT License'
 )
