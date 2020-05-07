@@ -13,14 +13,12 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/wenaught/flask-images",
     packages=setuptools.find_packages(),
+    package_dir={'flask_images': 'flask_images'},
+    package_data={'flask_images': ["config/config.json"]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.8',
-    entry_points={
-        'console_scripts': ['flask-images=flask_images.main:main']
-    },
     license='MIT License'
 )

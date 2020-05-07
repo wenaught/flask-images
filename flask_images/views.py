@@ -1,41 +1,28 @@
-import argparse
+import os
 from random import choice
+import json
 
 import boto3
 from botocore.exceptions import ClientError, BotoCoreError
-from flask import Flask, send_file, Response, request
+from flask import send_file, Response, request
 from werkzeug.utils import secure_filename
 
 from flask_images.database_helper import DatabaseHelper
+from flask_images import app
 
 s3 = boto3.client('s3')
-app = Flask('flask_images')
-DEFAULT_PORT = 8080
 
-parser_epilog = """To use the script, please provide a JSON configuration file of the following structure:
-{
-    "host": "server-address",
-    "database": "database-name",
-    "user": "user",
-    "password": "password"
-}
-"""
-parser = argparse.ArgumentParser(prog='flask-images',
-                                 description='Access image storage on S3',
-                                 epilog=parser_epilog,
-                                 formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('bucket', type=str, help='S3 bucket name')
-parser.add_argument('config', type=str, help="Configuration file name for database connection")
-parser.add_argument('-p', '--port', type=int, help='Port to run the app on', default=8080)
-args = parser.parse_args()
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config/config.json'), 'r') as config_file:
+    config_dict = json.loads(config_file.read())
 
-helper = DatabaseHelper(args.config, app.logger)
+bucket = config_dict.pop('bucket')
+helper = DatabaseHelper(config_dict, app.logger)
 
 
 @app.route('/random', methods=['GET'])
 def get_random_image():
     try:
-        s3_objects = s3.list_objects_v2(Bucket=args.bucket)
+        s3_objects = s3.list_objects_v2(Bucket=bucket)
         random_object_key = choice(s3_objects['Contents'])['Key']
         return get_s3_object(random_object_key)
     except (ClientError, BotoCoreError) as err:
@@ -59,7 +46,7 @@ def upload_image():
         file_path = '/tmp/{}'.format(f.filename)
         f.save(file_path)
         helper.upload_metadata(file_path)
-        s3.upload_file(file_path, args.bucket, secure_filename(f.filename))
+        s3.upload_file(file_path, bucket, secure_filename(f.filename))
         return Response(response='File uploaded successfully', status=200)
     except KeyError:
         return Response(response='File should be sent with \'data\' key', status=400)
@@ -70,13 +57,5 @@ def upload_image():
 
 def get_s3_object(object_key):
     file_path = '/tmp/{}'.format(object_key)
-    s3.download_file(args.bucket, object_key, file_path)
+    s3.download_file(bucket, object_key, file_path)
     return send_file(file_path)
-
-
-def main():
-    app.run(port=args.port)
-
-
-if __name__ == '__main__':
-    main()
