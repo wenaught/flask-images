@@ -5,8 +5,8 @@ from botocore.exceptions import ClientError, BotoCoreError
 from flask import Response, request, current_app, Blueprint
 from werkzeug.utils import secure_filename
 
-import flask_images.database
-import flask_images.utilities
+import flask_s3_images.database
+import flask_s3_images.utilities
 
 view_blueprint = Blueprint('views', __name__)
 
@@ -18,7 +18,7 @@ def get_random_image():
         bucket = current_app.config['BUCKET']
         s3_objects = s3.list_objects_v2(Bucket=bucket)
         random_object_key = choice(s3_objects['Contents'])['Key']
-        return flask_images.utilities.get_s3_object(s3, bucket, random_object_key)
+        return flask_s3_images.utilities.get_s3_object(s3, bucket, random_object_key)
     except (ClientError, BotoCoreError) as err:
         current_app.logger.error(err)
         return Response(response='Failed to fetch file from S3 with the following error: {}'.format(err), status=500)
@@ -29,7 +29,7 @@ def get_image(image_name):
     try:
         s3 = boto3.client('s3')
         bucket = current_app.config['BUCKET']
-        return flask_images.utilities.get_s3_object(s3, bucket, image_name)
+        return flask_s3_images.utilities.get_s3_object(s3, bucket, image_name)
     except (ClientError, BotoCoreError) as err:
         current_app.logger.error(err)
         return Response(response='Failed to fetch file from S3 with the following error: {}'.format(err), status=500)
@@ -40,7 +40,7 @@ def upload_image():
     try:
         s3 = boto3.client('s3')
         bucket = current_app.config['BUCKET']
-        database = flask_images.database.get_database()
+        database = flask_s3_images.database.get_database()
         f = request.files['data']
         file_path = '/tmp/{}'.format(f.filename)
         f.save(file_path)
