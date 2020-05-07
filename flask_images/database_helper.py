@@ -1,4 +1,3 @@
-import json
 import os
 from datetime import datetime
 
@@ -40,11 +39,8 @@ class DatabaseHelper:
         'ResolutionUnit': lambda x: x
     }
 
-    def __init__(self, config_filename, logger):
+    def __init__(self, config_dict, logger):
         self.logger = logger
-        with open(config_filename, 'r') as config_file:
-            config_dict = json.loads(config_file.read())
-            self.logger.debug('Loaded database config from {}'.format(config_filename))
         self.logger.info('Connecting to database')
         self.connector = mysql.connector.connect(**config_dict)
         self.cursor = self.connector.cursor()

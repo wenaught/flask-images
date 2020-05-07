@@ -1,0 +1,7 @@
+{
+    "host": "Database server address",
+    "database": "Database name",
+    "user": "Database user name",
+    "password": "Database user password",
+    "bucket": "S3 bucket name"
+}
