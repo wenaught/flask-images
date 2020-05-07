@@ -9,24 +9,14 @@ and uploading to the bucket.
 and `AWS_ACCESS_KEY_ID` environment variables set, and AWS CLI configured.
 
 # Usage
-```
-usage: flask-images [-h] [-p PORT] bucket config
 
-Access image storage on S3
-
-positional arguments:
-  bucket                S3 bucket name
-  config                Configuration file name for MySQL database connection
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -p PORT, --port PORT  Port to run the app on
-
-To use the script, please provide a JSON configuration file of the following structure:
+First, please edit `flask_images/config/config.json` according to your setup before installation:
+```json
 {
-    "host": "server-address",
-    "database": "database-name",
-    "user": "user",
-    "password": "password"
+    "host": "Database server address",
+    "database": "Database name",
+    "user": "Database user name",
+    "password": "Database user password",
+    "bucket": "S3 bucket name"
 }
 ```
