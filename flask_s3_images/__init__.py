@@ -1,8 +1,8 @@
 import os
 
 from flask import Flask
-import flask_images.database
-import flask_images.views
+import flask_s3_images.database
+import flask_s3_images.views
 
 
 def create_app(test_config=None):
@@ -17,6 +17,7 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
-    app.teardown_appcontext(flask_images.database.close_database)
-    app.register_blueprint()
+    app.teardown_appcontext(flask_s3_images.database.close_database)
+    app.register_blueprint(flask_s3_images.views.view_blueprint)
+    app.logger.info('Instance folder at: {}'.format(app.instance_path))
     return app
