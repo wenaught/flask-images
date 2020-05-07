@@ -5,7 +5,7 @@ from flask import current_app
 from PIL import Image
 from PIL.ExifTags import TAGS
 
-import flask_images.utilities
+import flask_s3_images.utilities
 
 
 class Database:
@@ -14,7 +14,7 @@ class Database:
         self.logger.info('Connecting to database')
         self.connector = mysql.connector.connect(**config_dict)
         self.cursor = self.connector.cursor()
-        with current_app.open_instance_resource('schema.sql') as f:
+        with current_app.open_resource('resources/schema.sql') as f:
             self.cursor.execute(f.read().decode('utf8'))
         self.cursor.execute('USE {}'.format(config_dict['database']))
 
@@ -23,11 +23,11 @@ class Database:
         image_metadata = image.getexif()
         image_metadata_dict = {TAGS.get(tag_id, tag_id): image_metadata.get(tag_id) for tag_id in image_metadata}
         upload_metadata_dict = dict()
-        for tag in flask_images.utilities.METADATA_TRANSFORM.keys():
-            upload_metadata_dict[tag] = flask_images.utilities.METADATA_TRANSFORM[tag](image_metadata_dict[tag])
+        for tag in flask_s3_images.utilities.METADATA_TRANSFORM.keys():
+            upload_metadata_dict[tag] = flask_s3_images.utilities.METADATA_TRANSFORM[tag](image_metadata_dict[tag])
         upload_metadata_dict['FileName'] = os.path.split(image_path)[1]
         self.logger.info('Uploading image metadata')
-        with current_app.open_instance_resource('insert_metadata.sql') as f:
+        with current_app.open_resource('resources/insert_metadata.sql') as f:
             self.cursor.execute(f.read().decode('utf8'), upload_metadata_dict)
         self.connector.commit()
 
@@ -42,7 +42,7 @@ def get_database():
     return current_app.database
 
 
-def close_database():
+def close_database(e=None):
     db = getattr(current_app, 'database', None)
     if db is not None:
         db.close_connection()
