@@ -14,11 +14,7 @@ view_blueprint = Blueprint('views', __name__)
 @view_blueprint.route('/random', methods=['GET'])
 def get_random_image():
     try:
-        s3_credentials = current_app.config['CREDENTIALS']
-        s3 = boto3.client('s3',
-                          aws_access_key_id=s3_credentials['AccessKeyId'],
-                          aws_secret_access_key=s3_credentials['SecretAccessKey'],
-                          aws_session_token=s3_credentials['Token'])
+        s3 = boto3.client('s3')
         bucket = current_app.config['BUCKET']
         s3_objects = s3.list_objects_v2(Bucket=bucket)
         random_object_key = choice(s3_objects['Contents'])['Key']
@@ -31,11 +27,7 @@ def get_random_image():
 @view_blueprint.route('/<image_name>', methods=['GET'])
 def get_image(image_name):
     try:
-        s3_credentials = current_app.config['CREDENTIALS']
-        s3 = boto3.client('s3',
-                          aws_access_key_id=s3_credentials['AccessKeyId'],
-                          aws_secret_access_key=s3_credentials['SecretAccessKey'],
-                          aws_session_token=s3_credentials['Token'])
+        s3 = boto3.client('s3')
         bucket = current_app.config['BUCKET']
         return flask_s3_images.utilities.get_s3_object(s3, bucket, image_name)
     except (ClientError, BotoCoreError) as err:
@@ -46,11 +38,7 @@ def get_image(image_name):
 @view_blueprint.route('/', methods=['POST'])
 def upload_image():
     try:
-        s3_credentials = current_app.config['CREDENTIALS']
-        s3 = boto3.client('s3',
-                          aws_access_key_id=s3_credentials['AccessKeyId'],
-                          aws_secret_access_key=s3_credentials['SecretAccessKey'],
-                          aws_session_token=s3_credentials['Token'])
+        s3 = boto3.client('s3')
         bucket = current_app.config['BUCKET']
         database = flask_s3_images.database.get_database()
         f = request.files['data']
