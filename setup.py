@@ -20,5 +20,13 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    license='MIT License'
+    license='MIT License',
+    install_requires=[
+        'Flask==1.1.2',
+        'Werkzeug==1.0.1',
+        'boto3==1.13.4',
+        'botocore==1.16.4',
+        'mysql-connector-python==8.0.20',
+        'Pillow==6.2.2'
+    ]
 )
