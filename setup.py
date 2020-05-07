@@ -14,7 +14,7 @@ setuptools.setup(
     url="https://github.com/wenaught/flask-s3-images",
     packages=setuptools.find_packages(),
     package_dir={'flask_s3_images': 'flask_s3_images'},
-    package_data={'flask_s3_images': ["*.sql"]},
+    package_data={'flask_s3_images': ["resources/*.sql"]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
