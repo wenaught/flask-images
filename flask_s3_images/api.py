@@ -47,7 +47,7 @@ def upload_image():
         f.save(file_path)
         database.upload_metadata(file_path)
         s3.upload_file(file_path, bucket, secure_filename(f.filename))
-        sns = boto3.client('sns', region_name=s3.meta.region_name)
+        sns = boto3.client('sns', region_name=current_app.config['REGION_NAME'])
         sns.publish(TopicArn=current_app.config['SNS_TOPIC_ARN'],
                     Subject='New image',
                     Message=urljoin(request.base_url, f.filename))

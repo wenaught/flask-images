@@ -12,7 +12,7 @@ def subscribe():
     else:
         email = request.form['email']
         sns_topic_arn = current_app.config['SNS_TOPIC_ARN']
-        client = boto3.client('sns', region_name=boto3.client('s3').meta.region_name)
+        client = boto3.client('sns', region_name=current_app.config['REGION_NAME'])
         client.subscribe(
             TopicArn=sns_topic_arn,
             Protocol='email',
