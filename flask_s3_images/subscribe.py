@@ -18,4 +18,4 @@ def subscribe():
             Protocol='email',
             Endpoint=email
         )
-        return redirect('/success')
+        return render_template('success.html')

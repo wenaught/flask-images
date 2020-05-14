@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 import flask_s3_images.database
 import flask_s3_images.utilities
 
-blueprint = Blueprint('api', __name__, url_prefix="/api")
+blueprint = Blueprint('api', __name__)
 
 
 @blueprint.route('/random', methods=['GET'])
