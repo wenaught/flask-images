@@ -1,17 +1,18 @@
 from random import choice
 
 import boto3
+from urlparse import urljoin
 from botocore.exceptions import ClientError, BotoCoreError
-from flask import Response, request, current_app, Blueprint
+from flask import Response, request, current_app, Blueprint, g
 from werkzeug.utils import secure_filename
 
 import flask_s3_images.database
 import flask_s3_images.utilities
 
-view_blueprint = Blueprint('views', __name__)
+blueprint = Blueprint('api', __name__, url_prefix="/api")
 
 
-@view_blueprint.route('/random', methods=['GET'])
+@blueprint.route('/random', methods=['GET'])
 def get_random_image():
     try:
         s3 = boto3.client('s3')
@@ -24,7 +25,7 @@ def get_random_image():
         return Response(response='Failed to fetch file from S3 with the following error: {}'.format(err), status=500)
 
 
-@view_blueprint.route('/<image_name>', methods=['GET'])
+@blueprint.route('/<image_name>', methods=['GET'])
 def get_image(image_name):
     try:
         s3 = boto3.client('s3')
@@ -35,7 +36,7 @@ def get_image(image_name):
         return Response(response='Failed to fetch file from S3 with the following error: {}'.format(err), status=500)
 
 
-@view_blueprint.route('/', methods=['POST'])
+@blueprint.route('/', methods=['POST'])
 def upload_image():
     try:
         s3 = boto3.client('s3')
@@ -46,6 +47,10 @@ def upload_image():
         f.save(file_path)
         database.upload_metadata(file_path)
         s3.upload_file(file_path, bucket, secure_filename(f.filename))
+        sns = boto3.client('sns')
+        sns.publish(TopicArn=current_app.config['SNS_TOPIC_ARN'],
+                    Subject='New image',
+                    Message=urljoin(request.base_url, f.filename))
         return Response(response='File uploaded successfully', status=200)
     except KeyError:
         return Response(response='File should be sent with \'data\' key', status=400)

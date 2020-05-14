@@ -1,7 +1,7 @@
 import os
 
 import mysql.connector
-from flask import current_app
+from flask import current_app, g
 from PIL import Image
 from PIL.ExifTags import TAGS
 
@@ -37,13 +37,12 @@ class Database:
 
 
 def get_database():
-    if not hasattr(current_app, 'database'):
-        current_app.database = Database(current_app.config['DB_CONFIG'], current_app.logger)
-    return current_app.database
+    if 'database' not in g:
+        g.database = Database(current_app.config['DB_CONFIG'], current_app.logger)
+    return g.database
 
 
 def close_database(e=None):
-    db = getattr(current_app, 'database', None)
+    db = g.pop('database', None)
     if db is not None:
         db.close_connection()
-        delattr(current_app, 'database')
