@@ -27,6 +27,6 @@ setuptools.setup(
         'boto3==1.13.4',
         'botocore==1.16.4',
         'mysql-connector-python==8.0.20',
-        'Pillow==6.2.2'
+        'Pillow==8.1.1'
     ]
 )
